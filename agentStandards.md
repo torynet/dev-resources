@@ -202,6 +202,12 @@ All agents must integrate with these core agents where applicable:
 - Use appropriate editing tools (Edit, MultiEdit) based on scope
 - Validate changes after editing
 
+### MCP Server Configuration Requirements
+- **🚨 CRITICAL:** User-level MCP servers MUST be placed at ROOT LEVEL of `C:\Users\telar\.claude.json`
+- **NEVER place user-level MCP servers in project sections** (like `"D:\\Tory\\repos\\storacle"`)
+- **Verify placement:** mcpServers should be at same level as "numStartups", "installMethod", etc.
+- **Test functionality:** Always verify MCP servers appear in `/mcp` command after installation
+
 ### File Creation Standards
 - Create files only when necessary for agent function
 - Use appropriate directory locations (user vs project level)
