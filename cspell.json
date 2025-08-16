@@ -1,0 +1,17 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "Pylint",
+    "Liskov",
+    "myapp",
+    "bulkification",
+    "SOQL",
+    "Queueable"
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    ".git/**",
+    "*.log"
+  ]
+}
