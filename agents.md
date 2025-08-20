@@ -40,7 +40,28 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
 
 ### Tier 2: Domain Agents (Specialists)
 
-#### Code and Development
+#### Software Development Agents
+*These agents help with actual software development work - the primary job you want to accomplish.*
+
+- **`decision-documenter`**: Creates comprehensive architecture decision records
+  - Capabilities: Decision documentation, alternatives analysis, rationale capture
+  - Use when: Recording technical decisions, architectural choices, design documentation
+
+- **`object-model-documenter`**: Salesforce object model documentation specialist
+  - Capabilities: Object documentation, field tables, Salesforce-specific formatting
+  - Use when: Creating/updating Salesforce object documentation
+
+- **`object-model-reviewer`**: Systematic Salesforce object model analysis and review
+  - Capabilities: Object model analysis, field validation, relationship verification
+  - Use when: Reviewing existing object models, validation processes
+
+- **`planning-coordinator`**: Strategic planning with mandatory GitHub Projects integration
+  - Capabilities: Task creation, milestone tracking, GitHub Projects sync
+  - Use when: Project planning, task coordination, progress tracking
+
+#### Claude Ecosystem Management Agents
+*These agents manage Claude Code itself - they keep the system running smoothly but aren't directly part of your software development work.*
+
 - **`agent-manager`**: Creates and manages the agent ecosystem itself
   - Capabilities: Agent creation, modification, architecture compliance
   - Use when: Creating new agents, updating agent definitions, ecosystem maintenance
@@ -53,27 +74,9 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
   - Capabilities: Error diagnosis, root cause analysis, solution development
   - Use when: Command failures, tool errors, system troubleshooting
 
-#### Documentation and Analysis
-- **`decision-documenter`**: Creates comprehensive architecture decision records
-  - Capabilities: Decision documentation, alternatives analysis, rationale capture
-  - Use when: Recording technical decisions, architectural choices, design documentation
-
 - **`instruction-compliance-checker`**: Validates work against all user instructions and policies
   - Capabilities: Comprehensive compliance verification, violation detection, remediation
   - Use when: Before completing major work, ensuring policy compliance
-
-- **`object-model-documenter`**: Salesforce object model documentation specialist
-  - Capabilities: Object documentation, field tables, Salesforce-specific formatting
-  - Use when: Creating/updating Salesforce object documentation
-
-- **`object-model-reviewer`**: Systematic Salesforce object model analysis and review
-  - Capabilities: Object model analysis, field validation, relationship verification
-  - Use when: Reviewing existing object models, validation processes
-
-#### Project and Memory Management
-- **`planning-coordinator`**: Strategic planning with mandatory GitHub Projects integration
-  - Capabilities: Task creation, milestone tracking, GitHub Projects sync
-  - Use when: Project planning, task coordination, progress tracking
 
 - **`session-manager`**: Work session checkpoint and resumption (self-bootstrapping)
   - Capabilities: Session state capture, git operations, project context restoration
@@ -83,7 +86,6 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
   - Capabilities: CLAUDE.md management, memory organization, cross-project insights
   - Use when: Updating user memories, organizing knowledge, preference management
 
-#### Configuration and Integration
 - **`user-config-manager`**: Version control for user-level configurations with git
   - Capabilities: Git commits, GitHub pushes, configuration backup, change management
   - Use when: Committing user-level config changes, backing up configurations
@@ -113,10 +115,18 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
 - Ensure quality and compliance
 
 **Common Patterns**:
-- Code changes → `claude-config-manager` → `user-config-manager` (for commits)
+
+*Software Development Work:*
 - Object documentation → `object-model-documenter` → `documentation-specialist` (for quality)
+- Project planning → `planning-coordinator` (with GitHub Projects sync)
+- Technical decisions → `decision-documenter` → `documentation-specialist` (for quality)
+
+*Claude Ecosystem Management:*
+- Work validation → `instruction-compliance-checker` (before completion)
+- Configuration changes → `claude-config-manager` → `user-config-manager` (for commits)
 - Problem solving → `claude-problem-solver` (processes queue, calls services)
-- Planning → `planning-coordinator` (with GitHub Projects sync)
+- Agent development → `agent-manager` → `user-config-manager` (for commits)
+- Session management → `session-manager` (checkpoint/resume)
 
 ### For Primary Claude (Orchestrator)
 
@@ -131,10 +141,19 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
 8. Offer problem queue processing if problems exist
 
 **Standard Patterns**:
+
+*For Software Development:*
+- Use `decision-documenter` for architectural choices and technical decisions
+- Use `object-model-documenter` and `object-model-reviewer` for Salesforce work
+- Use `planning-coordinator` for project planning and GitHub Projects integration
+
+*For Claude Ecosystem Management:*
 - Always run `instruction-compliance-checker` before marking significant work complete
 - Run `notification-manager` after tasks taking >2 minutes
 - Check `D:\problem-queue.md` after task completion
 - Use `session-manager` for checkpoint/resume operations
+- Use `claude-problem-solver` to process problem queues
+- Use `user-config-manager` to commit ecosystem changes
 
 ## Agent Locations
 
