@@ -52,9 +52,10 @@ All agents must include these core sections:
 1. **Agent Title** (# Agent Name)
 2. **Brief Introduction** explaining agent purpose
 3. **Agent Tier Classification** section defining tier level and delegation rules
-4. **Core Responsibilities** section with specific capabilities
-5. **Problem Queue Integration** section for error handling
-6. **Service Integration** section for Tier 3 service usage (Tier 2 agents only)
+4. **Critical Safety Requirements** section with timeout protection
+5. **Core Responsibilities** section with specific capabilities
+6. **Problem Queue Integration** section for error handling
+7. **Service Integration** section for Tier 3 service usage (Tier 2 agents only)
 
 ### Optional but Recommended Sections
 
@@ -62,6 +63,45 @@ All agents must include these core sections:
 - **Examples** for usage patterns
 - **Troubleshooting** for common issues
 - **Configuration** for agent-specific settings
+
+## Critical Safety Requirements
+
+### Mandatory Timeout Protection
+
+All agents must include a "Critical Safety Requirements" section with comprehensive timeout protection:
+
+```markdown
+## Critical Safety Requirements
+
+### Timeout Protection
+- **ALL external commands MUST include timeout parameter**
+- **ALL [tool-specific] operations require [X]-second timeout**
+- **ALL file operations require appropriate timeouts**
+
+### Safe Command Patterns
+```markdown
+# For external commands
+Bash(command, timeout=30000, description="Command description with timeout")
+mcp__tool__operation(timeout=45000, description="MCP operation with timeout")
+Tool(parameters, timeout=15000, description="Tool operation with timeout")
+```
+
+### Tool-Specific Timeout Requirements
+
+**Bash Commands**:
+- Basic operations: 30-second timeout
+- Git operations: 45-60 second timeout
+- Network operations: 60-90 second timeout
+- Package operations: 120-second timeout
+
+**MCP Operations**:
+- GitHub Projects: 60-second timeout
+- Notifications: 30-second timeout
+- File operations: 15-30 second timeout
+
+**File Tools**:
+- Read/Write: 15-second timeout
+- Search operations: 30-45 second timeout
 
 ## Error Handling Standards
 
@@ -284,6 +324,8 @@ Regular audits should verify:
 
 - All agents follow YAML frontmatter standards
 - Tier classification is clearly defined and correct
+- Critical Safety Requirements section with timeout protection is present
+- All external commands include mandatory timeout parameters
 - Problem queue integration is present and correct
 - Service integration patterns follow three-tier restrictions
 - No circular call patterns exist in agent definitions
