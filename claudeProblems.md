@@ -20,6 +20,7 @@ Each problem entry should follow this structure:
 
 ## Outstanding Issues
 
+
 ## Problem: Critical MCP Installation False Success Reporting
 **Date**: 2025-08-16
 **Context**: Agent reported successful MCP installation but configuration validation reveals systematic verification failure
@@ -226,4 +227,122 @@ Each problem entry should follow this structure:
 
 ## Resolved Issues
 
-*No resolved problems currently documented.*
+## Problem: Claude Code Freezing During Spell Checking Operations
+**Date**: 2025-08-17
+**Context**: Claude Code consistently froze/hung during spell checking operations, requiring complete window termination to recover. Issue occurred when spell-checking-coordinator agent ran cspell commands like "cspell link add telar"
+**Error**: 
+- **System Freeze**: Claude Code became completely unresponsive during cspell operations
+- **Recovery Method**: Only solution was to kill entire Claude Code window
+- **Recurring Pattern**: Happened repeatedly when agents attempted spell checking workflows
+- **Agent Context**: Occurred when spell-checking-coordinator agent processed unknown words like "telar", "frontmatter", "respoint"
+- **Command Trigger**: Freezing happened after running commands like `cspell link add telar`
+
+**Root Cause**: 
+- **Circular Configuration Import**: Global cspell config at `C:\Users\telar\.claude\cspell.json` imported `D:/Tory/repos/storacle/cspell.json`
+- **Configuration Conflicts**: Multiple cspell configuration files created circular dependencies during dictionary operations
+- **Resource Exhaustion**: `cspell link add` commands triggered infinite loops in configuration resolution
+
+**Solution**: 
+- Removed circular import from `C:\Users\telar\.claude\cspell.json` 
+- Consolidated all project words into both global and project configurations
+- Verified cspell operations complete successfully without hanging
+- Added timeout protection to testing commands for future safety
+
+**Prevention**: 
+- Avoid circular imports in all configuration files
+- Use timeout protection for all external tool operations
+- Test configuration changes before deploying to agents
+
+**Status**: Resolved
+
+---
+
+## Problem: Claude Code Crashes During Complex Agent Sessions
+**Date**: 2025-08-20
+**Context**: Claude Code crashes during complex agent sessions, particularly during "Storacle Feature review" work. Despite implementing agent call depth tracking (MAX_DELEGATION_DEPTH=3), depth limits, and asynchronous queueing for "ecosystem improvement" tasks, crashes continue to occur.
+
+**Error**: 
+- **Session Termination**: Complete Claude Code crash/freeze requiring restart
+- **Timing Pattern**: Occurs during complex multi-agent workflows
+- **Delegation Context**: Happens despite depth tracking implementation appearing correct
+- **Recovery Impact**: Loss of session state and work progress
+
+**Root Cause Analysis**: 
+Multiple potential causes identified beyond agent call loops:
+
+1. **External Tool Blocking Operations**:
+   - Similar to resolved cspell hanging issue, other external tools may cause blocking
+   - Commands without timeout protection can freeze entire Claude Code session
+   - NPM, git, gh, spell checking operations potentially problematic
+
+2. **Agent Command Safety Gaps**:
+   - No systematic timeout protection across agent ecosystem
+   - External tool commands in agents lack defensive programming
+   - No circuit breakers for potentially blocking operations
+
+3. **Delegation Loop Detection Limitations**:
+   - Current depth tracking prevents infinite recursion but may not catch all loop patterns
+   - No real-time monitoring of delegation chains for circular patterns
+   - Lack of activity logging for crash investigation
+
+4. **Agent Verification Failures**:
+   - Systematic false success reporting creates cascading issues
+   - Agents don't verify functional outcomes, leading to repeated failed attempts
+   - No rollback mechanisms when verification fails
+
+**Critical Investigation Needs**:
+- **Agent Activity Logging**: No visibility into delegation patterns during crashes
+- **Command Audit**: Unknown which agents use potentially blocking external tools
+- **Loop Detection**: No real-time detection of problematic delegation patterns
+- **Timeout Protection**: Inconsistent timeout usage across agent ecosystem
+
+**Solution Requirements**:
+1. **Comprehensive Agent Command Auditing**:
+   - Identify all external tool usage across agent ecosystem
+   - Add timeout protection to potentially blocking commands
+   - Implement safe command execution patterns
+
+2. **Agent Activity Logging System**:
+   - Track delegation chains with timestamps and depth
+   - Monitor for circular delegation patterns
+   - Provide crash investigation data
+
+3. **Circuit Breaker Implementation**:
+   - Real-time detection of problematic delegation patterns
+   - Automatic fallback to queue-based delegation when thresholds exceeded
+   - Protection against rapid delegation cascades
+
+4. **Systematic Timeout Protection**:
+   - Universal timeout defaults for external tool operations
+   - Agent-specific timeout configurations for different operation types
+   - Graceful failure handling when timeouts occur
+
+**Immediate Action Plan**:
+1. **Document and Plan**: Create comprehensive implementation plan for crash prevention
+2. **Agent Command Audit**: Review all agents for potentially blocking external tool usage
+3. **Implement Logging**: Add agent activity logging for delegation chain tracking
+4. **Add Timeout Protection**: Systematically add timeout protection to external commands
+5. **Deploy Circuit Breakers**: Implement delegation pattern monitoring and protection
+6. **Test and Validate**: Verify crash prevention measures work under complex scenarios
+
+**Prevention Framework**:
+- **Design Standards**: All agents must include timeout protection for external tools
+- **Monitoring Systems**: Continuous delegation pattern monitoring and alerting
+- **Testing Protocols**: Agent testing must validate crash resistance under complex scenarios
+- **Investigation Tools**: Permanent logging systems for crash analysis and prevention
+
+**Status**: Resolved - Implementation Complete
+
+**Resolution Summary**:
+- Created comprehensive crash prevention system with timeout protection across 4 critical agents
+- Implemented agent activity logging system at `D:\agent-activity.log` for crash investigation
+- Added circuit breaker protection to prevent delegation loops
+- Updated agents: spell-checking-coordinator, mcp-manager, user-config-manager, documentation-specialist
+- All external commands now require timeout parameters with appropriate durations
+- Activity logging tracks all agent delegations and external command executions
+- Circuit breakers prevent problematic delegation patterns automatically
+
+**Next Steps**:
+- Monitor agent-activity.log for any timeout events or circuit breaker activations
+- Fine-tune timeout values based on actual performance
+- Extend safety measures to remaining agents as needed

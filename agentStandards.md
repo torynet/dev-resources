@@ -1,6 +1,27 @@
 # Agent Standards and Shared Behaviors
 
-This document defines the standard behaviors, patterns, and requirements that apply to all Claude Code agents in the ecosystem.
+This document defines the standard behaviors, patterns, and requirements that apply to all Claude Code agents in the three-tier architecture ecosystem.
+
+## Three-Tier Architecture Overview
+
+All agents operate within a three-tier architecture designed to prevent circular calls and ensure system stability:
+
+### Tier 1: Orchestrator (Primary Claude)
+- **Role**: Central coordinator and decision maker
+- **Delegation**: Can call any agent based on task requirements
+- **Responsibility**: Makes all sequencing decisions beyond Tier 3 service calls
+
+### Tier 2: Domain Agents
+- **Role**: Specialized expertise in specific domains
+- **Delegation**: Can ONLY call Tier 3 service agents
+- **Examples**: object-model-documenter, claude-problem-solver, planning-coordinator
+- **Restriction**: CANNOT call other Tier 2 agents - must return recommendations to orchestrator
+
+### Tier 3: Service Agents
+- **Role**: Pure utility services with no delegation capabilities
+- **Delegation**: CANNOT call any other agents - must queue problems instead
+- **Examples**: documentation-specialist, notification-manager
+- **Guarantee**: Terminal nodes in all delegation chains - mathematically prevents loops
 
 ## YAML Frontmatter Standards
 
@@ -30,9 +51,10 @@ All agents must include these core sections:
 
 1. **Agent Title** (# Agent Name)
 2. **Brief Introduction** explaining agent purpose
-3. **Core Responsibilities** section with specific capabilities
-4. **Integration Points** section with other agent coordination
-5. **Quality Standards** section with validation requirements
+3. **Agent Tier Classification** section defining tier level and delegation rules
+4. **Core Responsibilities** section with specific capabilities
+5. **Problem Queue Integration** section for error handling
+6. **Service Integration** section for Tier 3 service usage (Tier 2 agents only)
 
 ### Optional but Recommended Sections
 
@@ -43,80 +65,77 @@ All agents must include these core sections:
 
 ## Error Handling Standards
 
-### Universal Error Reporting
+### Problem Queue Integration
 
-All agents must include a "Claude Problem Solver Integration" section with these requirements:
+All agents must include a "Problem Queue Integration" section:
 
 ```markdown
-### Claude Problem Solver Integration
+### Problem Queue Integration
 
-- **Error Reporting**: When encountering errors, command failures, or tool issues while working, delegate error analysis to claude-problem-solver via Task tool while continuing to attempt alternative solutions
-- **Problem Documentation**: Provide complete error context including specific commands that failed, error messages, and environmental details
-- **Continue Working**: Always continue attempting alternative approaches - error reporting should not stop work progress
-- **Pattern Recognition**: Report recurring issues to help develop permanent prevention strategies
+**Problem Reporting**: When encountering issues:
+- Append problems to `${DEV}problem-queue.md`
+- Format: `- [ ] [timestamp] agent-name: Problem description`
+- Include full context for troubleshooting
+- Continue with best-effort service delivery
 ```
+
+### Tier-Specific Error Handling
+
+**Tier 2 Domain Agents**: Can delegate to claude-problem-solver via Task tool for complex error analysis
+
+**Tier 3 Service Agents**: MUST queue problems instead of delegating - cannot call claude-problem-solver directly
 
 ### Error Reporting Behavior
 
 - **Continue Working**: Never stop work due to errors - always try alternative approaches
-- **Report While Working**: Delegate errors to claude-problem-solver simultaneously with attempting fixes
+- **Queue Problems**: Add issues to problem queue while continuing work
 - **Complete Context**: Include exact commands, error messages, and environmental details
 - **Pattern Building**: Help build institutional knowledge for permanent problem prevention
 
 ## Quality Assurance Standards
 
+### Documentation Quality via Tier 3 Services
+
+Tier 2 agents that create or edit documentation must use the documentation-specialist service:
+
+```markdown
+### Service Integration
+
 ### Documentation Quality
-
-All agents must include and follow these quality standards:
-
-```markdown
-## Quality Standards
-
-- Always run `markdownlint --fix *.md` after editing
-- Always run `npx cspell *.md` for spell checking
-- If spell checking issues found, delegate to spell-checking-coordinator agent via Task tool
-- Remove trailing spaces and multiple consecutive blank lines
-- Ensure final line terminators in all markdown files
-- Use LF line endings consistently
-- Validate markdown syntax and structure
+- Use Task(documentation-specialist) for formatting and quality of all documentation
+- Ensure all documents meet quality standards through comprehensive processing
+- Maintain consistent documentation format and structure
 ```
 
-### Spell Checking Integration
+### Tier 3 Service: Documentation Specialist
 
-All agents that create or edit documentation must include:
+The documentation-specialist provides complete document quality including:
+- Markdown formatting and linting
+- Comprehensive spell checking with dictionary management
+- Structure consistency validation
+- Quality standards enforcement
 
-```markdown
-### Spell Checking Coordinator Integration
-
-- **Unknown Word Handling**: Delegate spell checking of created/edited content to spell-checking-coordinator via Task tool
-- **Technical Term Validation**: Use spell-checking-coordinator for domain-specific terminology validation
-- **Dictionary Management**: Coordinate with spell-checking-coordinator for term categorization
-- **Quality Standards**: Ensure all documentation passes spell checking through spell-checking-coordinator
-```
+**Note**: The spell-checking-coordinator has been merged into documentation-specialist for simplified service delivery.
 
 ## Notification Standards
 
-### Work Completion Notifications
+### Notification Service Integration
 
-Agents performing work that takes >30 seconds must include:
+Tier 2 agents performing work that takes >30 seconds must include:
 
 ```markdown
-### Notification Manager Integration
-
-- **Completion Notifications**: Delegate to notification-manager when completing work that takes >30 seconds
-- **Use notification type**: "[appropriate_type]" for specific agent operations
-- **Provide context**: Include details about work completed and results achieved
-- **Example delegation**: "[Agent type] work complete - [specific accomplishments]"
+### Notifications
+- Use Task(notification-manager) for completion notifications on work >30 seconds
+- Notify when critical milestones are achieved or work is completed
+- Provide status updates during complex operations
 ```
 
-### Notification Types by Agent Category
+### Notification Types
 
-- **Documentation agents**: "documentation_task"
-- **Configuration agents**: "configuration_task"
-- **Analysis agents**: "analysis_task"
-- **Management agents**: "management_task"
-- **Problem resolution**: "problem_resolution"
-- **General agent work**: "agent_subtask"
+- **Agent Subtask**: "agent_subtask" for Tier 2 agent work completion
+- **Task Completion**: "primary_task" for major user-requested work (orchestrator)
+- **Error Alerts**: "error" for critical issues requiring attention
+- **Progress Updates**: "progress" for ongoing work status
 
 ## Agent Location Standards
 
@@ -140,37 +159,40 @@ Agents performing work that takes >30 seconds must include:
 3. **Explain Benefits**: Clarify that user-level agents work across all projects
 4. **Justify Project-Level**: Only use when agent has strong project-specific context
 
-## Integration Standards
+## Three-Tier Integration Standards
 
-### Required Agent Integrations
+### Tier 2 Agent Service Integration
 
-All agents must integrate with these core agents where applicable:
+Tier 2 domain agents must include service integration patterns:
 
-#### Documentation Specialist Integration
+#### Tier 3 Service Usage
 ```markdown
-- **Documentation Quality**: Delegate documentation formatting and quality assurance to documentation-specialist via Task tool
-- **Content Structure**: Use documentation-specialist for complex document organization
-- **Cross-Reference Validation**: Delegate link validation and document consistency to documentation-specialist
+### Service Integration
+
+### Documentation Quality
+- Use Task(documentation-specialist) for formatting and quality of all documentation
+- Ensure all documents meet quality standards
+- Maintain consistent documentation format
+
+### Notifications
+- Use Task(notification-manager) for completion notifications on work >30 seconds
+- Provide status updates during complex operations
 ```
 
-#### User Memory Manager Integration
-```markdown
-- **Pattern Storage**: Delegate cross-project insights and successful patterns to user-memory-manager via Task tool
-- **Configuration Preferences**: Store user preferences and successful approaches in user-level memory
-- **Cross-Project Learning**: Use user-memory-manager for insights that apply across projects
-```
+### Delegation Rules by Tier
 
-### Delegation Patterns
+#### Tier 1 (Orchestrator)
+- **Can call**: Any agent based on task requirements
+- **Responsibility**: All sequencing decisions beyond Tier 3 service calls
 
-#### Task Tool Usage
-- Use Task tool for agent-to-agent delegation
-- Provide clear, actionable delegation prompts
-- Include complete context for the receiving agent
+#### Tier 2 (Domain Agents)
+- **Can call**: ONLY Tier 3 service agents
+- **Cannot call**: Other Tier 2 agents - must return recommendations to orchestrator
+- **Service usage**: Task(documentation-specialist), Task(notification-manager)
 
-#### Integration Timing
-- **Real-time coordination**: For immediate assistance needs
-- **Post-completion delegation**: For documentation, notifications, and memory storage
-- **Error reporting**: Immediate delegation while continuing work
+#### Tier 3 (Service Agents)
+- **Cannot call**: Any other agents - must queue problems to ${DEV}problem-queue.md
+- **Restriction**: Terminal nodes in delegation chains
 
 ## Agent Design Principles
 
@@ -241,10 +263,11 @@ All agents must integrate with these core agents where applicable:
 
 The agent-manager agent is responsible for:
 
-1. **Standards Enforcement**: Ensure all new and updated agents comply with standards
-2. **Standards Updates**: Update this document when new patterns emerge
-3. **Compatibility Audits**: Regularly check agent compliance with current standards
-4. **Evolution Management**: Guide agent ecosystem development following standards
+1. **Standards Enforcement**: Ensure all new and updated agents comply with three-tier architecture
+2. **Tier Classification**: Properly classify agents into appropriate tiers
+3. **Architecture Compliance**: Validate that agents respect delegation restrictions
+4. **Standards Updates**: Update this document when architecture patterns evolve
+5. **Compatibility Audits**: Regularly check agent compliance with tier restrictions
 
 ### Standards Update Process
 
@@ -260,9 +283,10 @@ When updating these standards:
 Regular audits should verify:
 
 - All agents follow YAML frontmatter standards
-- Error reporting integration is present and correct
-- Quality assurance standards are implemented
-- Integration patterns follow current best practices
+- Tier classification is clearly defined and correct
+- Problem queue integration is present and correct
+- Service integration patterns follow three-tier restrictions
+- No circular call patterns exist in agent definitions
 - Agent locations follow user-level preference guidelines
 
 ## Exception Handling
