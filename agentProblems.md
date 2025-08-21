@@ -27,7 +27,46 @@
 - **Priority**: CRITICAL - System stability
 - **Status**: **DOCUMENTED** - All agents now include timeout protection requirements and safe command patterns
 
-### 4. **Widespread Architecture Violations** 🔄 **IN PROGRESS**
+### 4. **Widespread Architecture Violations** ✅ **FIXED**
+- **Issue**: 124+ total violations across all 14 agents including delegation_depth, spell-checking-coordinator references, work_type patterns
+- **Impact**: Creates potential for circular calls and system instability
+- **Evidence**: Systematic audit found violations in every agent
+- **Priority**: CRITICAL - Architecture integrity
+- **Status**: **COMPLETED** - All 124+ violations resolved, all agents comply with three-tier architecture
+
+### 5. **Agent Lockups Despite Architecture Fixes** 🚨 **CRITICAL NEW ISSUE**
+- **Issue**: Multiple agents locking up in fresh sessions despite architecture compliance
+- **Impact**: System unusable for complex agent tasks
+- **Evidence**: 
+  - agent-manager locked up in long-standing session when asked to modify object-model-reviewer
+  - user-memory-manager locked up in fresh session when asked to audit agent commands
+  - Both occurred after architecture fixes were implemented
+- **Pattern**: Lockups seem to occur when agents attempt complex multi-file operations
+- **Priority**: CRITICAL - Core functionality broken
+- **Status**: **ACTIVE INVESTIGATION** - Needs immediate diagnosis
+
+#### Suspected Root Causes:
+1. **Mass File Processing**: Agents trying to process all 14 agent files simultaneously
+2. **Resource Exhaustion**: Complex operations hitting Claude Code limits
+3. **Hidden Circular Patterns**: Subtle loops not caught by architecture fixes
+4. **Timeout Protection Ineffective**: Timeout parameters not properly enforced by Claude Code
+5. **Context/Memory Issues**: Large operations overwhelming system capacity
+
+#### Most Likely Problematic Agent: **user-memory-manager**
+**Reasoning**: 
+- Recently locked up when asked to audit "all agent definitions"
+- Has broad access to read/modify user memory and all agent files
+- Performs complex cross-file analysis operations
+- Most likely to trigger mass file processing scenarios
+- Has tools: Read, Edit, MultiEdit, Bash, Task - full filesystem access
+
+#### Troubleshooting Steps Needed:
+1. **Remove user-memory-manager temporarily** from ecosystem
+2. **Test other agents** to see if lockups continue
+3. **Identify specific operations** that trigger lockups
+4. **Verify timeout protection** is actually working
+5. **Check resource limits** in Claude Code
+6. **Test with single-file operations** vs multi-file operations
 - **Issue**: 12 agents contained obsolete delegation patterns and references to deleted agents
 - **Impact**: System instability, crashes, broken functionality
 - **Evidence**: 
