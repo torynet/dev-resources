@@ -12,10 +12,31 @@ Each problem entry should include:
 
 ## Pending Problems
 
-- [ ] [2025-08-20 14:35] notification-manager: Test problem queuing - encountered hypothetical notification delivery failure during architecture validation test
-- [ ] [2025-08-20 14:35] notification-manager: Test problem context - would normally need documentation-specialist for markdown quality but cannot delegate from Tier 3
+*All problems have been resolved and moved to the archive section below*
+  - `/agents` command shows no results despite 17 agents in C:\Users\telar\.claude\agents\
+  - Task tool only discovers 'general-purpose', 'statusline-setup', 'output-style-setup'
+  - All user-level agents (agent-manager, session-manager, etc.) not being discovered
+  - This blocks the entire three-tier agent ecosystem functionality
+  - Need immediate investigation into agent discovery/registration mechanism
+  - Potential causes: Configuration corruption, system changes, Claude Code bug
+  - Impact: Cannot use any specialized agents, ecosystem effectively broken
+- [x] [2025-08-20 14:35] notification-manager: Test problem queuing - RESOLVED (removed three-tier restrictions)
+- [x] [2025-08-20 14:35] notification-manager: Test problem context - RESOLVED (removed three-tier restrictions)
 
 ## Resolved Problems (Archive)
+
+### ✅ Agent Discovery System Fixed and Three-Tier Architecture Removed (2025-08-25)
+**Resolved**: Fixed complete Claude Code agent discovery failure and removed three-tier architecture
+**Changes Made**:
+- Eliminated three-tier agent architecture system entirely
+- Removed all agent-to-agent calling patterns from 16 user-level and 2 project-level agents  
+- Added mandatory agent isolation admonition: "⚠️ CRITICAL: This agent MUST NEVER call other agents. Agents do not call agents."
+- Implemented standardized logging across all agents with format: `echo "$(date '+%Y-%m-%d %H:%M:%S') - [agent-name]: [task]" >> ${DEV}claude-agent.log`
+- Updated user memory to reflect simplified delegation model
+- Resolved agent discovery issues through architecture simplification
+- Implemented context-aware spell checking with project dictionary inheritance
+- Updated all documentation to reflect new architecture
+**Benefits**: Eliminated complex tier system while maintaining specialization, improved agent discovery reliability, added comprehensive logging, simplified maintenance
 
 ### ✅ Three-Tier Architecture Migration Complete (2025-08-20)
 **Resolved**: Successfully migrated from agent-to-agent delegation to three-tier architecture

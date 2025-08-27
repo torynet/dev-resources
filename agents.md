@@ -4,41 +4,39 @@ This document provides a comprehensive overview of the Claude Code agent ecosyst
 
 ## Architecture Overview
 
-The agent ecosystem uses a **three-tier architecture** designed to prevent crashes and ensure system stability:
+The agent ecosystem uses a **simple delegation architecture** where the primary Claude instance coordinates all work:
 
 ```
 ┌─────────────────────────────────────────┐
-│ Tier 1: Orchestrator (Primary Claude)  │
-│ • Central coordinator and decision maker │
-│ • Can call any agent based on need      │
+│ Primary Claude (Orchestrator/Delegator) │
+│ • Central coordinator and decision maker│
+│ • Delegates to appropriate agents       │
 │ • Makes all sequencing decisions        │
+│ • Only entity that calls agents         │
 └─────────────────────────────────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────┐
-│ Tier 2: Domain Agents (11 specialists) │
-│ • Specialized expertise in domains      │
-│ • Can ONLY call Tier 3 services         │
-│ • Return recommendations to orchestrator│
-└─────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────┐
-│ Tier 3: Service Agents (3 utilities)   │
-│ • Pure utility services                 │
-│ • Cannot call any other agents          │
-│ • Terminal nodes - prevent loops        │
+│ Specialized Agents (14 specialists)     │
+│ • Domain expertise and capabilities     │
+│ • NEVER call other agents               │
+│ • Return results to primary Claude      │
+│ • Complete isolation prevents loops     │
 └─────────────────────────────────────────┘
 ```
 
-**Key Safety Feature**: Since Tier 3 agents cannot call anyone, and Tier 2 agents can only call Tier 3, circular calls are mathematically impossible.
+**Key Safety Features**: 
+- **Agent Isolation**: All agents are completely isolated and cannot call other agents
+- **Single Delegation Point**: Only primary Claude can delegate to agents
+- **Loop Prevention**: Mathematical impossibility of circular calls
+- **Standardized Logging**: All agents log their activities for debugging
 
 ## Agent Inventory
 
-### Tier 1: Orchestrator
+### Primary Orchestrator
 - **Primary Claude**: You! The central coordinator that makes all delegation decisions and sequences work across the ecosystem.
 
-### Tier 2: Domain Agents (Specialists)
+### Specialized Agents
 
 #### Software Development Agents
 *These agents help with actual software development work - the primary job you want to accomplish.*
@@ -94,15 +92,21 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
   - Capabilities: MCP troubleshooting, server discovery, Windows compatibility fixes
   - Use when: MCP server issues, discovering new servers, Windows setup problems
 
-### Tier 3: Service Agents (Utilities)
-
 - **`documentation-specialist`**: Complete document quality service (formatting + spell checking)
   - Capabilities: Markdown formatting, linting, spell checking, structure consistency
-  - Used by: Tier 2 agents for comprehensive document quality processing
+  - Use when: Creating/updating documentation, ensuring markdown quality
 
-- **`notification-manager`**: Context-aware notification service with scope differentiation
-  - Capabilities: Task completion alerts, error notifications, progress updates
-  - Used by: Tier 2 agents for completion notifications and status updates
+- **`file-analyzer`**: File content extraction and summarization for context optimization
+  - Capabilities: File analysis, content summarization, pattern identification
+  - Use when: Analyzing large files, extracting key information, reducing context usage
+
+- **`code-analyzer`**: Code analysis, logic tracing, bug research, vulnerability detection
+  - Capabilities: Code review, bug detection, logic flow analysis, security analysis
+  - Use when: Code quality review, debugging, security analysis
+
+- **`test-runner`**: Test execution and result analysis with full output capture
+  - Capabilities: Test execution, result analysis, failure diagnosis
+  - Use when: Running tests, validating code changes, debugging test failures
 
 ## How to Use the Ecosystem
 
@@ -128,13 +132,13 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
 - Agent development → `agent-manager` → `user-config-manager` (for commits)
 - Session management → `session-manager` (checkpoint/resume)
 
-### For Primary Claude (Orchestrator)
+### For Primary Claude (Orchestrator/Delegator)
 
 **Delegation Strategy**:
 1. Analyze user request and requirements
-2. Identify which Tier 2 agent(s) can fulfill the task
+2. Identify which specialized agent(s) can fulfill the task
 3. Call agents using `Task(agent-name)` with detailed prompts
-4. Let Tier 2 agents call Tier 3 services as needed
+4. Agents work in complete isolation - no agent-to-agent calls
 5. Evaluate agent response and recommendations
 6. Decide next agent based on results
 7. Run compliance checking before completion
@@ -146,21 +150,24 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
 - Use `decision-documenter` for architectural choices and technical decisions
 - Use `object-model-documenter` and `object-model-reviewer` for Salesforce work
 - Use `planning-coordinator` for project planning and GitHub Projects integration
+- Use `test-runner` for test execution and validation
+- Use `code-analyzer` for code review and bug detection
 
 *For Claude Ecosystem Management:*
 - Always run `instruction-compliance-checker` before marking significant work complete
-- Run `notification-manager` after tasks taking >2 minutes
+- Use direct notification MCP server for completion notifications
 - Check `D:\problem-queue.md` after task completion
 - Use `session-manager` for checkpoint/resume operations
 - Use `claude-problem-solver` to process problem queues
 - Use `user-config-manager` to commit ecosystem changes
+- Use `file-analyzer` to analyze large files and reduce context usage
 
 ## Agent Locations
 
 ### User-Level Agents (Default)
 **Location**: `C:\Users\telar\.claude\agents\`
 **Benefits**: Available across all projects, persistent across project switches
-**Contains**: All 14 general-purpose and cross-project agents
+**Contains**: All 16 specialized agents with standardized logging
 
 ### Project-Level Agents (When Needed)
 **Location**: `[project]\.claude\agents\`
@@ -170,30 +177,34 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
 ## Safety Features
 
 ### Crash Prevention
-1. **Three-Tier Architecture**: Mathematically prevents circular calls
-2. **Timeout Protection**: All external commands include timeout parameters
-3. **Problem Queue**: Non-blocking error handling at `D:\problem-queue.md`
-4. **Graceful Degradation**: Agents continue working despite individual tool failures
+1. **Agent Isolation**: Complete agent isolation prevents circular calls
+2. **Single Delegation Point**: Only primary Claude can call agents
+3. **Timeout Protection**: All external commands include timeout parameters
+4. **Problem Queue**: Non-blocking error handling at `D:\problem-queue.md`
+5. **Graceful Degradation**: Agents continue working despite individual tool failures
+6. **Standardized Logging**: All agents log activities to `${DEV}claude-agent.log`
 
 ### Quality Assurance
 1. **Compliance Checking**: Mandatory validation against all user instructions
-2. **Documentation Quality**: Automatic formatting, linting, and spell checking
+2. **Documentation Quality**: Context-aware spell checking with project dictionaries
 3. **Version Control**: All user-level configuration changes backed up to GitHub
-4. **Architecture Compliance**: All agents follow tier restrictions and safety patterns
+4. **Architecture Compliance**: All agents follow isolation requirements
+5. **Markdown Quality**: Comprehensive linting and formatting standards
 
 ## Troubleshooting
 
 ### If Claude Code Crashes
-1. The three-tier architecture should prevent this, but if it happens:
+1. Agent isolation should prevent this, but if it happens:
 2. Check `D:\problem-queue.md` for any queued problems
 3. Run `claude-problem-solver` to process the queue
-4. Review recent agent activity logs
+4. Review recent agent activity in `${DEV}claude-agent.log`
 
 ### If Agents Aren't Working
-1. Check agent tier classification and delegation rules
+1. Check agent isolation requirements and delegation rules
 2. Verify timeout protection is included in agent definitions
 3. Ensure problem queue integration is working
 4. Use `agent-manager` to validate agent compliance
+5. Check agent activity logs for error patterns
 
 ### If Tools Hang or Timeout
 1. All agents include comprehensive timeout protection
@@ -205,17 +216,19 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
 
 ### Creating New Agents
 1. Use `agent-manager` to create new agents
-2. Properly classify into appropriate tier
+2. Include agent isolation admonition
 3. Include mandatory timeout protection
 4. Add problem queue integration
-5. Follow three-tier delegation rules
+5. Add standardized logging
+6. Follow agent isolation principles
 
 ### Updating Existing Agents
-1. Maintain tier classification and restrictions
+1. Maintain agent isolation restrictions
 2. Preserve timeout protection patterns
 3. Update service integration as needed
 4. Test delegation patterns
-5. Commit changes via `user-config-manager`
+5. Ensure logging is included
+6. Commit changes via `user-config-manager`
 
 ### Ecosystem Health
 1. Regular compliance audits via `instruction-compliance-checker`
@@ -228,8 +241,8 @@ The agent ecosystem uses a **three-tier architecture** designed to prevent crash
 ### Key Files
 - `D:\agentStandards.md`: Development standards and requirements
 - `D:\problem-queue.md`: Central problem tracking for later resolution
-- `D:\three-tier-architecture.md`: Technical architecture specification
-- `C:\Users\telar\.claude\CLAUDE.md`: User memory and orchestration instructions
+- `D:\claude-agent.log`: Centralized agent activity logging
+- `C:\Users\telar\.claude\CLAUDE.md`: User memory and delegation instructions
 
 ### Agent Definitions
 - User-level: `C:\Users\telar\.claude\agents\*.md`
@@ -252,4 +265,4 @@ The agent ecosystem is working correctly when:
 
 ---
 
-**System Status**: Fully operational with comprehensive crash prevention, timeout protection, and quality assurance. All 16 agents comply with three-tier architecture and safety requirements.
+**System Status**: Fully operational with agent isolation, timeout protection, standardized logging, and quality assurance. All 16 agents comply with isolation requirements and safety patterns.
