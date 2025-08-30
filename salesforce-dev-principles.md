@@ -46,7 +46,7 @@
 
 ### Lightning Development
 
-- Choose Lightning Web Components over Aura for new development
+- Choose Lightning Web Components (never use Aura or visualforce) for development
 - Follow component composition patterns - small, reusable components
 - Handle errors gracefully with user-friendly messages
 - Use Lightning Data Service when appropriate for automatic caching

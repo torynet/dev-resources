@@ -1,0 +1,7 @@
+To get Cursor to open paths in the Inspirato profile, change the "HKEY_CLASSES_ROOT\cursor\shell\open\command" from this:
+"C:\Users\telar\AppData\Local\Programs\cursor\Cursor.exe" "--open-url" "--" "%1"
+to this:
+"C:\Users\telar\AppData\Local\Programs\cursor\Cursor.exe" "--user-data-dir=C:\Users\telar\.cursor-inspirato" "--open-url" "--" "%1"
+because this:
+C:\Users\telar\AppData\Local\Programs\cursor\Cursor.exe --user-data-dir="C:\Users\telar\.cursor-inspirato"
+is the way you open that profile in Cursor.
