@@ -64,7 +64,7 @@ winget install Git.Git
 
 ```powershell
 # Install PowerShell commit-msg hook for automatic issue ID prefixing
-Copy-Item D:\commit-msg-hook.ps1 .git\hooks\commit-msg
+Copy-Item $env:DEV/resources/commit-msg-hook.ps1 .git/hooks/commit-msg
 
 # For cross-platform projects, create a wrapper script
 @"
@@ -279,8 +279,9 @@ npm install -g cspell
 **Configuration Files**:
 
 - Global: `C:\Users\telar\.claude\cspell.json`
-- Project: `D:\Tory\repos\storacle\cspell.json`
-- VSCode: `D:\Tory\repos\storacle\.vscode\cspell.json`
+- Development Environment: `$env:DEV/resources/cspell.json`
+- Project: `$env:DEV/repos/storacle/cspell.json`
+- VSCode: `$env:DEV/repos/storacle/.vscode/cspell.json`
 
 **Project Configuration** (`cspell.json`):
 
@@ -325,9 +326,12 @@ npx playwright install
 ### Key Environment Variables
 
 #### Development Environment
-- `DEV`: Points to development drive (`D:`) for cross-platform compatibility
+- `DEV`: Points to development drive for cross-platform compatibility
+  - **Windows**: `D:` (Windows Dev Drive)
+  - **macOS**: `/opt/dev` or `/Users/$USER/dev`  
+  - **Linux**: `/opt/dev` or `/home/$USER/dev`
 - `HOME`: User home directory (Windows: `%USERPROFILE%`, Unix: `$HOME`)
-- `CLAUDE_CONFIG_PATH`: Path to Claude configuration directory (`$HOME\.claude`)
+- `CLAUDE_CONFIG_PATH`: Path to Claude configuration directory (`$HOME/.claude`)
 
 #### Cross-Platform Compatibility
 - `SHELL`: Set to `pwsh` for consistent PowerShell behavior
@@ -349,8 +353,8 @@ Add to PowerShell profile (`$PROFILE`):
 Set-Alias -Name sf -Value "C:\Users\telar\AppData\Roaming\npm\sf.cmd"
 Set-Alias -Name gh -Value "C:\Program Files\GitHub CLI\gh.exe"
 
-# Cross-platform environment variables
-$env:DEV = "D:"
+# Cross-platform environment variables (Windows example)
+$env:DEV = "D:"  # Windows: D:, macOS/Linux: /opt/dev or /home/user/dev
 $env:HOME = $env:USERPROFILE
 $env:CLAUDE_CONFIG_PATH = "$env:HOME\.claude"
 
@@ -366,19 +370,24 @@ $env:TERM = "xterm-256color"
 
 ## Project Structure Standards
 
-### Directory Layout
+### Folder Layout
 
 ```text
 ${DEV}/
-├── repos/
-│   └── project-name/
-│       ├── .vscode/
-│       │   └── cspell.json
-│       ├── cspell.json
-│       ├── CLAUDE.md
-│       └── README.md
-├── claude-agent.log
-└── local-dev-environment.md
+├── resources/
+│   ├── commit-msg-hook.ps1
+│   ├── local-dev-environment.md
+│   ├── claude-agent.log
+│   ├── cspell.json
+│   ├── agentStandards.md
+│   └── problem-queue.md
+└── repos/
+    └── project-name/
+        ├── .vscode/
+        │   └── cspell.json
+        ├── cspell.json
+        ├── CLAUDE.md
+        └── README.md
 ```
 
 ### File Conventions
@@ -387,6 +396,14 @@ ${DEV}/
 - Use UTF-8 encoding
 - Follow project-specific naming conventions
 - Include comprehensive spell check dictionaries
+
+### Key Resources Files
+
+- `agentStandards.md`: Development standards and agent requirements
+- `problem-queue.md`: Central problem tracking for issue resolution
+- `cspell.json`: Master spell-check dictionary for development environment
+- `commit-msg-hook.ps1`: Git hook for automatic issue ID prefixing
+- `claude-agent.log`: Agent activity logging for debugging and tracking
 
 ## Initialization Checklist
 
@@ -403,13 +420,14 @@ ${DEV}/
 2. **Clone Development Environment**:
 
    ```bash
-   # Clone development drive setup and tools
-   git clone https://github.com/username/dev-environment.git D:\dev-setup
-   # Copy or link development environment files to D:\
+   # Clone development drive setup and tools (cross-platform)
+   git clone https://github.com/username/dev-environment.git $env:DEV/dev-setup
+   # Copy or link development environment files to $env:DEV
    ```
 
 3. **Configure Cross-Platform Environment Variables**:
 
+   **Windows (PowerShell)**:
    ```powershell
    # Ensure PowerShell profile exists
    if (!(Test-Path $PROFILE)) {
@@ -419,12 +437,27 @@ ${DEV}/
    # Add environment variables for cross-platform compatibility
    Add-Content $PROFILE @"
    # Cross-platform development environment
-   `$env:DEV = 'D:'
+   `$env:DEV = 'D:'  # Windows Dev Drive
    `$env:HOME = `$env:USERPROFILE
    `$env:CLAUDE_CONFIG_PATH = '`$env:HOME\.claude'
    `$env:SHELL = 'pwsh'
    `$env:TERM = 'xterm-256color'
    "@
+   ```
+
+   **macOS/Linux (PowerShell)**:
+   ```bash
+   # Add to ~/.config/powershell/Microsoft.PowerShell_profile.ps1
+   # or create PowerShell profile
+   mkdir -p ~/.config/powershell
+   cat >> ~/.config/powershell/Microsoft.PowerShell_profile.ps1 << 'EOF'
+   # Cross-platform development environment
+   $env:DEV = "/opt/dev"  # or /home/$USER/dev
+   $env:HOME = $env:HOME
+   $env:CLAUDE_CONFIG_PATH = "$env:HOME/.claude"
+   $env:SHELL = "pwsh"
+   $env:TERM = "xterm-256color"
+   EOF
    ```
 
 ### New Project Setup
