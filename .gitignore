@@ -1,6 +1,14 @@
-﻿Tory
+Tory
 Inspirato
 $RECYCLE.BIN
 .history
 claude-agent.log
 *.cer
+
+# Obsidian user-specific files (cause merge conflicts)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Temporary files
+*.tmp
+*.tmp.*
