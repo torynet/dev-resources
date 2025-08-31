@@ -1,0 +1,1 @@
+#456: Fix validation bug in user registration
