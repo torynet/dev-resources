@@ -2,12 +2,15 @@
   "version": "0.2",
   "language": "en",
   "words": [
-    "Pylint",
+    "bulkification",
+    "Inspirato",
     "Liskov",
     "myapp",
-    "bulkification",
+    "Netherton",
+    "Pylint",
+    "Queueable",
     "SOQL",
-    "Queueable"
+    "Syndacon"
   ],
   "ignorePaths": [
     "node_modules/**",
